@@ -40,7 +40,10 @@ class CPU:
                                 'JMP': 0b01010100,
                                 'AND': 0b10101000,
                                 'OR': 0b10101010,
-                                'XOR': 0b10101011
+                                'XOR': 0b10101011,
+                                'NOT': 0b01101001,
+                                'SHL': 0b10101100,
+                                'SHR': 0b10101101
                             }
 
     def load(self, filename = 'No File'):
@@ -351,6 +354,84 @@ class CPU:
         self.reg[idx_a] = c
         # increment the ram pointer
         self.pc += 3
+    
+    def bit_not(self):
+        '''
+        Perform a bitwise-NOT on the value in a register, 
+        storing the result in the register.
+        '''
+        # get the register index
+        index = self.ram[self.pc+1]
+        # get the value from the register index
+        value = self.reg[index]
+        # set the value to its compliment
+        value = ~value
+        # store it in the same register
+        self.reg[index] = value
+        # increment the ram pointer
+        self.pc += 2
+
+    def shl(self):
+        '''
+        Shift the value in registerA left by the number of bits specified in registerB,
+        filling the low bits with 0.
+        '''
+        # get indices
+        idx_a = self.ram[self.pc+1]
+        idx_b = self.ram[self.pc+2]
+        # get values
+        a = self.reg[idx_a]
+        b = self.reg[idx_b]
+        # turn a into a binary string
+        a = bin(a)[2:]
+        # create an empty string to hold 0's
+        c = ''
+        d = ''
+        # loop through range of b adding 0's to c
+        for i in range(0, 8-len(a)):
+            c = c + '0'
+        for i in range(0, b):
+            d = d + '0'
+        # combine a and c
+        a = c + a
+        # cut off the right end of a
+        a = a + d
+        a = a[b:]
+        # store it in register a as a binary int
+        self.reg[idx_a] = int(a, 2)
+        # increment ram pointer
+        self.pc += 3
+    
+    def shr(self):
+        '''
+        Shift the value in registerA right by the number of bits specified in registerB,
+        filling the high bits with 0.
+        '''
+        # get indices
+        idx_a = self.ram[self.pc+1]
+        idx_b = self.ram[self.pc+2]
+        # get values
+        a = self.reg[idx_a]
+        b = self.reg[idx_b]
+        # turn a into a binary string
+        a = bin(a)[2:]
+        # create an empty string to hold 0's
+        c = ''
+        d = ''
+        # loop through range of b adding 0's to c
+        for i in range(0, 8-(len(a))):
+            c = c + '0'
+        for i in range(0, b):
+            d = d + '0'
+        # combine a and c
+        a = c + a
+        # cut off the right end of a
+        a = d + a
+        a = a[:-b]
+        # store it in register a binary int
+        self.reg[idx_a] = int(a, 2)
+        # increment ram pointer
+        self.pc += 3
 
     # push
     def push(self):
@@ -530,6 +611,18 @@ class CPU:
             # XOR
             elif instruction == self.instructions['XOR']:
                 self.xor()
+            
+            # NOT
+            elif instruction == self.instructions['NOT']:
+                self.bit_not()
+
+            # SHL
+            elif instruction == self.instructions['SHL']:
+                self.shl()
+
+            # SHR
+            elif instruction == self.instructions['SHR']:
+                self.shr()
 
             # PUSH
             elif instruction == self.instructions['PUSH']:
