@@ -43,7 +43,8 @@ class CPU:
                                 'XOR': 0b10101011,
                                 'NOT': 0b01101001,
                                 'SHL': 0b10101100,
-                                'SHR': 0b10101101
+                                'SHR': 0b10101101,
+                                'MOD': 0b10100100
                             }
 
     def load(self, filename = 'No File'):
@@ -433,6 +434,30 @@ class CPU:
         # increment ram pointer
         self.pc += 3
 
+    def mod(self):
+        '''
+        Divide the value in the first register by the value in the second, 
+        storing the remainder of the result in registerA.
+        If the value in the second register is 0, 
+        the system should print an error message and halt.
+        '''
+        # get the indices
+        idx_a = self.ram[self.pc+1]
+        idx_b = self.ram[self.pc+2]
+        # get the values
+        a = self.reg[idx_a]
+        b = self.reg[idx_b]
+        # check exceptions
+        if b == 0:
+            print('ERROR: value b = 0')
+            self.hlt()
+        # get the modulus
+        c = a % b
+        # store it at index a in register
+        self.reg[idx_a] = c
+        # increment the ram pointer
+        self.pc += 3
+
     # push
     def push(self):
         '''
@@ -623,6 +648,10 @@ class CPU:
             # SHR
             elif instruction == self.instructions['SHR']:
                 self.shr()
+
+            # MOD
+            elif instruction == self.instructions['MOD']:
+                self.mod()
 
             # PUSH
             elif instruction == self.instructions['PUSH']:
