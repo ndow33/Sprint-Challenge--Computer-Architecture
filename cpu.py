@@ -38,7 +38,9 @@ class CPU:
                                 'JEQ': 0b01010101,
                                 'JNE': 0b01010110,
                                 'JMP': 0b01010100,
-                                'AND': 0b10101000
+                                'AND': 0b10101000,
+                                'OR': 0b10101010,
+                                'XOR': 0b10101011
                             }
 
     def load(self, filename = 'No File'):
@@ -249,6 +251,106 @@ class CPU:
         self.reg[idx_a] = c
         # increment the ram pointer
         self.pc += 3
+    
+    def bit_or(self):
+        '''
+        Perform a bitwise-OR between the values in registerA and registerB, 
+        storing the result in registerA.
+        '''
+        # get the indexes of the registers from ram
+        idx_a = self.ram[self.pc+1]
+        idx_b = self.ram[self.pc+2]
+        # get the values held in the registers
+        value_a = self.reg[idx_a]
+        value_b = self.reg[idx_b]
+        # convert them to binary strings
+        bin_a = bin(value_a)[2:]
+        bin_b = bin(value_b)[2:]
+        # zeroes value
+        z = ''
+        # combined value
+        c = ''
+        # make sure the binary numbers are the same length
+        # if b is shorter than a
+        if len(bin_a) > len(bin_b):
+            for i in range(0, (len(bin_a)-len(bin_b))):
+                z = z + '0'
+            # add zeroes to the front of b
+            bin_b = z + bin_b
+
+        # if a is shorter than b
+        if len(bin_a) < len(bin_b):
+            for i in range(0, (len(bin_b)-len(bin_a))):
+                z = z + '0'
+            # add zeroes to the front of a
+            bin_a = z + bin_a
+        
+        # once a and b have equal lengths
+        if len(bin_a) == len(bin_b):   
+            # loop through each value
+            for i in range(0, len(bin_a)):
+                if bin_a[i] == '1' or bin_b[i] == '1':
+                    c = c + '1'
+                else:
+                    c = c + '0'
+
+        # cast the binary string to binary int
+        c = int(c, 2)
+        # store the result in register idx_a
+        self.reg[idx_a] = c
+        # increment the ram pointer
+        self.pc += 3
+
+    def xor(self):
+        '''
+        Perform a bitwise-XOR between the values in registerA and registerB, 
+        storing the result in registerA.
+        '''
+        # get the indexes of the registers from ram
+        idx_a = self.ram[self.pc+1]
+        idx_b = self.ram[self.pc+2]
+        # get the values held in the registers
+        value_a = self.reg[idx_a]
+        value_b = self.reg[idx_b]
+        # convert them to binary strings
+        bin_a = bin(value_a)[2:]
+        bin_b = bin(value_b)[2:]
+        # zeroes value
+        z = ''
+        # combined value
+        c = ''
+        # make sure the binary numbers are the same length
+        # if b is shorter than a
+        if len(bin_a) > len(bin_b):
+            for i in range(0, (len(bin_a)-len(bin_b))):
+                z = z + '0'
+            # add zeroes to the front of b
+            bin_b = z + bin_b
+
+        # if a is shorter than b
+        if len(bin_a) < len(bin_b):
+            for i in range(0, (len(bin_b)-len(bin_a))):
+                z = z + '0'
+            # add zeroes to the front of a
+            bin_a = z + bin_a
+        
+        # once a and b have equal lengths
+        if len(bin_a) == len(bin_b):   
+            # loop through each value performing xor logic
+            for i in range(0, len(bin_a)):
+                if bin_a[i] == '1' and bin_b[i] == '0':
+                    c = c + '1'
+                elif bin_a[i] == '0' and bin_b[i] == '1':
+                    c = c + '1'
+                else:
+                    c = c + '0'
+
+        # cast the binary string to binary int
+        c = int(c, 2)
+        # store the result in register idx_a
+        self.reg[idx_a] = c
+        # increment the ram pointer
+        self.pc += 3
 
     # push
     def push(self):
@@ -420,6 +522,14 @@ class CPU:
             # AND
             elif instruction == self.instructions['AND']:
                 self.bit_and()
+
+            # OR
+            elif instruction == self.instructions['OR']:
+                self.bit_or()
+
+            # XOR
+            elif instruction == self.instructions['XOR']:
+                self.xor()
 
             # PUSH
             elif instruction == self.instructions['PUSH']:
